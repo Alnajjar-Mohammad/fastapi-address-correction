@@ -1,0 +1,87 @@
+[
+    {
+        "text": "Hawalli Governorate, Mubarak Al-Abdullah, St 101, 1",
+        "annotations": [
+            {"start": 0, "end": 19, "label": "GOV"},
+            {"start": 21, "end": 40, "label": "AREA"},
+            {"start": 42, "end": 48, "label": "STREET"},
+            {"start": 50, "end": 51, "label": "BUILDING"}
+        ]
+    },
+    {
+        "text": "Hawalli Governorate, Hawalli, beirut st, 4",
+        "annotations": [
+            {"start": 0, "end": 19, "label": "GOV"},
+            {"start": 21, "end": 28, "label": "AREA"},
+            {"start": 30, "end": 39, "label": "STREET"},
+            {"start": 41, "end": 42, "label": "BUILDING"}
+        ]
+    },
+    {
+        "text": "Mubarak Al Kabeer Governorate, Abu Ftaira, st 163, 7",
+        "annotations": [
+            {"start": 0, "end": 31, "label": "GOV"},
+            {"start": 33, "end": 44, "label": "AREA"},
+            {"start": 46, "end": 52, "label": "STREET"},
+            {"start": 54, "end": 55, "label": "BUILDING"}
+        ]
+    },
+    {
+        "text": "Hawalli Governorate, Salmiya, st 9, 3",
+        "annotations": [
+            {"start": 0, "end": 19, "label": "GOV"},
+            {"start": 21, "end": 28, "label": "AREA"},
+            {"start": 30, "end": 34, "label": "STREET"},
+            {"start": 36, "end": 37, "label": "BUILDING"}
+        ]
+    },
+    {
+        "text": "Ahmadi Governorate, Mangaf, salem sabah al salem al sabah st, 5",
+        "annotations": [
+            {"start": 0, "end": 20, "label": "GOV"},
+            {"start": 22, "end": 28, "label": "AREA"},
+            {"start": 30, "end": 65, "label": "STREET"},
+            {"start": 67, "end": 68, "label": "BUILDING"}
+        ]
+    },
+    {
+        "text": "Mubarak Al Kabeer Governorate, Al-Qusour, St 7, 4",
+        "annotations": [
+            {"start": 0, "end": 30, "label": "GOV"},
+            {"start": 33, "end": 42, "label": "AREA"},
+            {"start": 44, "end": 48, "label": "STREET"},
+            {"start": 50, "end": 51, "label": "BUILDING"}
+        ]
+    },
+    {
+        "text": "Cairo Street, Block 3, Qadsiya, Kuwait City, Al Asimah, 25501, Kuwait",
+        "annotations": [
+            {"start":0, "end": 11, "label": "STREET"},
+            {"start":14, "end": 20, "label": "BLOCK"},
+            {"start":23, "end": 29, "label": "AREA"},
+            {"start":45, "end": 53, "label": "GOV"}
+
+        ]
+    },
+    {
+        "text": "Street 32, Block 1, Hawally, Hawalli",
+        "annotations": [
+            {"start":0, "end": 8, "label": "STREET"},
+            {"start":10, "end": 17, "label": "BLOCK"},
+            {"start":19, "end": 27, "label": "GOV"},
+            {"start":28, "end": 34, "label": "AREA"}
+
+        ]
+    },
+    {
+        "text": "Hawalli Governorate,Mubarak Al-Abdullah,4,st 3",
+        "annotations": [
+            {"start":0, "end": 18, "label": "GOV"},
+            {"start":20, "end": 38, "label": "AREA"},
+            {"start":40, "end": 41, "label": "BLOCK"},
+            {"start":42, "end": 45, "label": "AREA"}
+
+        ]
+    }
+
+]

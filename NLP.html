@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Address Correction</title>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fc;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Container for content */
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Title styling */
+        h1 {
+            font-size: 2em;
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Input Styling */
+        input[type="text"] {
+            padding: 12px;
+            font-size: 16px;
+            width: calc(100% - 130px);
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        /* Button Styling */
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Result Box Styling */
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result.success {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .result.error {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+
+        .result.loading {
+            background-color: #f1f8e9;
+            color: #8e8e8e;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+                width: 100%;
+            }
+
+            input[type="text"] {
+                width: calc(100% - 120px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Address Correction Tool</h1>
+        <div>
+            <label for="address">Enter Address:</label>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <input type="text" id="address" placeholder="e.g., Salmiya st1 blk12">
+                <button onclick="submitAddress()">Submit</button>
+            </div>
+        </div>
+        
+        <div class="result loading" id="result">Please enter an address to get the correction.</div>
+    </div>
+
+    <script>
+        async function submitAddress() {
+            const address = document.getElementById('address').value;
+            const resultDiv = document.getElementById('result');
+            
+            // Clear previous results and show loading state
+            resultDiv.innerHTML = '⏳ Processing...';
+            resultDiv.classList.remove('success', 'error');
+            resultDiv.classList.add('loading');
+
+            if (!address) {
+                resultDiv.innerHTML = '❌ Please enter an address.';
+                resultDiv.classList.remove('loading');
+                resultDiv.classList.add('error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/correct-address/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ "address": address })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    resultDiv.innerHTML = `✅ Corrected Address: ${data.corrected_address}`;
+                    resultDiv.classList.remove('loading');
+                    resultDiv.classList.add('success');
+                } else {
+                    resultDiv.innerHTML = `❌ Error: ${data.detail || 'Something went wrong.'}`;
+                    resultDiv.classList.remove('loading');
+                    resultDiv.classList.add('error');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '❌ Network Error: Could not reach the API.';
+                resultDiv.classList.remove('loading');
+                resultDiv.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>
