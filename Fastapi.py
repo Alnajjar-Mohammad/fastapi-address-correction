@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from wfastcgi import WSGIMiddleware
 import uvicorn
 from pydantic import BaseModel
 import spacy
