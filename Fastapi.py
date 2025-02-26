@@ -5,7 +5,6 @@ import spacy
 import re
 import os
 
-# Load the trained model
 nlp_test = spacy.load("en_core_web_md")
 
 corrections = {
@@ -51,16 +50,14 @@ app.add_middleware(
 )
 
 class AddressInput(BaseModel):
-    address: str
+    input_text: str
 
 def correct_address_format(address):
-    # Fix spacing between letters and numbers (e.g., "st1" → "st 1")
     address = re.sub(r'(\D)(\d)', r'\1 \2', address)
     address = re.sub(r'(\d)(\D)', r'\1 \2', address)
     abbreviations = "|".join(corrections.keys())
     address = re.sub(rf'(\w)({abbreviations})\b', r'\1 \2', address, flags=re.IGNORECASE)
 
-    # Tokenize and process the address
     doc = nlp_test(address)
 
     corrected_tokens = []
@@ -68,27 +65,39 @@ def correct_address_format(address):
         word = token.text.strip()
         word_lower = word.lower()
 
-        # Replace abbreviations with full words
         if word_lower in corrections:
             word = corrections[word_lower]
 
-        # Capitalize first letter of place names (heuristic: words before first number)
         if not any(char.isdigit() for char in word):
             word = word.capitalize()
 
         corrected_tokens.append(word)
 
-    # Join corrected tokens to form the final address
     corrected_address = " ".join(corrected_tokens)
 
     return corrected_address
 
+def extract_phone_and_address(input_text):
+    phone_pattern = r'(\+965\s?)?(965\s?)?([9|6|5|4]\d{7})' 
+    phone_match = re.search(phone_pattern, input_text)
+    
+    if phone_match:
+        phone_number = phone_match.group(0)
+        address = input_text.replace(phone_number, "").strip()
+    else:
+        phone_number = None
+        address = input_text.strip()
 
-# API endpoint to get corrected address
+    corrected_address = correct_address_format(address)
+
+    return phone_number, corrected_address
+
+
+# API endpoint to get phone number and corrected address
 @app.post("/correct-address/")
 def correct_address(input: AddressInput):
-    corrected_address = correct_address_format(input.address)
-    return {"corrected_address": corrected_address}
+    phone_number, corrected_address = extract_phone_and_address(input.input_text)
+    return {"phone_number": phone_number, "corrected_address": corrected_address}
 
 # Run the app
 if __name__ == "__main__":

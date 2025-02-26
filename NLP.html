@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Address Correction</title>
+    <title>Address & Phone Extraction</title>
     <style>
-        /* General Body Styling */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f7fc;
@@ -17,8 +16,6 @@
             align-items: center;
             height: 100vh;
         }
-
-        /* Container for content */
         .container {
             background-color: #fff;
             padding: 30px 40px;
@@ -27,16 +24,12 @@
             width: 100%;
             max-width: 500px;
         }
-
-        /* Title styling */
         h1 {
-            font-size: 2em;
+            font-size: 1.8em;
             color: #4CAF50;
             text-align: center;
             margin-bottom: 20px;
         }
-
-        /* Input Styling */
         input[type="text"] {
             padding: 12px;
             font-size: 16px;
@@ -46,15 +39,12 @@
             margin-right: 10px;
             transition: all 0.3s ease;
         }
-
         input[type="text"]:focus {
             border-color: #4CAF50;
             outline: none;
         }
-
-        /* Button Styling */
         button {
-            padding: 12px 25px;
+            padding: 12px 20px;
             font-size: 16px;
             cursor: pointer;
             background-color: #4CAF50;
@@ -63,74 +53,60 @@
             border-radius: 8px;
             transition: background-color 0.3s ease;
         }
-
         button:hover {
             background-color: #45a049;
         }
-
-        /* Result Box Styling */
         .result {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 16px;
             padding: 10px;
             border-radius: 8px;
             text-align: center;
         }
-
-        .result.success {
+        .success {
             background-color: #e8f5e9;
             color: #388e3c;
         }
-
-        .result.error {
+        .error {
             background-color: #ffebee;
             color: #d32f2f;
         }
-
-        .result.loading {
+        .loading {
             background-color: #f1f8e9;
             color: #8e8e8e;
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 600px) {
-            .container {
-                padding: 20px;
-                width: 100%;
-            }
-
-            input[type="text"] {
-                width: calc(100% - 120px);
-            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Address Correction Tool</h1>
+        <h1>Address & Phone Extractor</h1>
         <div>
-            <label for="address">Enter Address:</label>
+            <label for="inputText">Enter Address & Phone:</label>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <input type="text" id="address" placeholder="e.g., Salmiya st1 blk12">
-                <button onclick="submitAddress()">Submit</button>
+                <input type="text" id="inputText" placeholder="e.g., Salmiya st1 blk12, +96598765432">
+                <button onclick="submitData()">Submit</button>
             </div>
         </div>
-        
-        <div class="result loading" id="result">Please enter an address to get the correction.</div>
+        <div class="result loading" id="result">Please enter data to extract details.</div>
+        <div class="result success" id="phoneResult" style="display:none;"></div>
+        <div class="result success" id="addressResult" style="display:none;"></div>
     </div>
 
     <script>
-        async function submitAddress() {
-            const address = document.getElementById('address').value;
+        async function submitData() {
+            const inputText = document.getElementById('inputText').value;
             const resultDiv = document.getElementById('result');
+            const phoneDiv = document.getElementById('phoneResult');
+            const addressDiv = document.getElementById('addressResult');
             
-            // Clear previous results and show loading state
             resultDiv.innerHTML = '⏳ Processing...';
             resultDiv.classList.remove('success', 'error');
             resultDiv.classList.add('loading');
+            phoneDiv.style.display = 'none';
+            addressDiv.style.display = 'none';
 
-            if (!address) {
-                resultDiv.innerHTML = '❌ Please enter an address.';
+            if (!inputText) {
+                resultDiv.innerHTML = '❌ Please enter an address with phone number.';
                 resultDiv.classList.remove('loading');
                 resultDiv.classList.add('error');
                 return;
@@ -139,17 +115,21 @@
             try {
                 const response = await fetch('http://127.0.0.1:8000/correct-address/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ "address": address })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ "input_text": inputText })
                 });
 
                 const data = await response.json();
                 if (response.ok) {
-                    resultDiv.innerHTML = `✅ Corrected Address: ${data.corrected_address}`;
+                    resultDiv.innerHTML = '✅ Extraction Successful';
                     resultDiv.classList.remove('loading');
                     resultDiv.classList.add('success');
+                    
+                    phoneDiv.innerHTML = `📞 Phone Number: ${data.phone_number}`;
+                    phoneDiv.style.display = 'block';
+                    
+                    addressDiv.innerHTML = `📍 Corrected Address: ${data.corrected_address}`;
+                    addressDiv.style.display = 'block';
                 } else {
                     resultDiv.innerHTML = `❌ Error: ${data.detail || 'Something went wrong.'}`;
                     resultDiv.classList.remove('loading');
