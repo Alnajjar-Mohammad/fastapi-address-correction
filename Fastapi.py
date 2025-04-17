@@ -5,9 +5,14 @@ from pydantic import BaseModel
 import spacy
 import re
 import os
+from langdetect import detect
+from camel_tools.tokenizers.word import simple_word_tokenize
 
-nlp_test = spacy.load("en_core_web_md")
+# Load English and Arabic NLP models
+nlp_en = spacy.load("en_core_web_md")
+nlp_ar = spacy.load("xx_ent_wiki_sm")  # multilingual spaCy model (basic Arabic support)
 
+# Address corrections
 corrections = {
     # Street variations
     "st": "Street", "str": "Street", "stre": "Street", "stre." : "Street",
@@ -37,7 +42,6 @@ corrections = {
     "governrt": "Governorate", "Governorate": "Governorate",
 }
 
-
 # FastAPI app
 app = FastAPI()
 
@@ -59,23 +63,35 @@ def correct_address_format(address):
     abbreviations = "|".join(corrections.keys())
     address = re.sub(rf'(\w)({abbreviations})\b', r'\1 \2', address, flags=re.IGNORECASE)
 
-    doc = nlp_test(address)
+    # Detect language
+    try:
+        lang = detect(address)
+    except:
+        lang = 'en'
 
     corrected_tokens = []
-    for token in doc:
-        word = token.text.strip()
-        word_lower = word.lower()
 
-        if word_lower in corrections:
-            word = corrections[word_lower]
+    if lang == 'ar':
+        # Tokenize using camel_tools
+        tokens = simple_word_tokenize(address)
+        for word in tokens:
+            word = word.strip()
+            corrected_tokens.append(word)
+    else:
+        doc = nlp_en(address)
+        for token in doc:
+            word = token.text.strip()
+            word_lower = word.lower()
 
-        if not any(char.isdigit() for char in word):
-            word = word.capitalize()
+            if word_lower in corrections:
+                word = corrections[word_lower]
 
-        corrected_tokens.append(word)
+            if not any(char.isdigit() for char in word):
+                word = word.capitalize()
+
+            corrected_tokens.append(word)
 
     corrected_address = " ".join(corrected_tokens)
-
     return corrected_address
 
 def extract_phone_and_address(input_text):
@@ -93,7 +109,6 @@ def extract_phone_and_address(input_text):
 
     return phone_number, corrected_address
 
-
 # API endpoint to get phone number and corrected address
 @app.post("/correct-address/")
 def correct_address(input: AddressInput):
@@ -103,5 +118,4 @@ def correct_address(input: AddressInput):
 # Run the app
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=port)

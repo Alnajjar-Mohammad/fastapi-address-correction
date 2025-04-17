@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLOv8 Live Detection</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        video, canvas {
+            border: 2px solid black;
+            width: 640px;
+            height: 480px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>YOLOv8 Live Detection</h1>
+<video id="camera" autoplay></video>
+<canvas id="canvas"></canvas>
+
+<script>
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let isProcessing = false;
+
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+
+            video.onloadedmetadata = () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                requestAnimationFrame(captureFrame);
+            };
+        } catch (err) {
+            console.error("Camera access denied:", err);
+        }
+    }
+
+    async function captureFrame() {
+        if (isProcessing) {
+            requestAnimationFrame(captureFrame);
+            return;
+        }
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        isProcessing = true;
+
+        canvas.toBlob(async (blob) => {
+            const formData = new FormData();
+            formData.append("file", blob, "frame.jpg");
+
+            try {
+                const response = await fetch("http://localhost:8000/predict/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const imageBlob = await response.blob();
+                    const imgURL = URL.createObjectURL(imageBlob);
+
+                    const resultImg = new Image();
+                    resultImg.onload = () => {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(resultImg, 0, 0, canvas.width, canvas.height);
+                    };
+                    resultImg.src = imgURL;
+                }
+            } catch (err) {
+                console.error("API Error:", err);
+            } finally {
+                isProcessing = false;
+                requestAnimationFrame(captureFrame);
+            }
+        }, "image/jpeg", 0.8);
+    }
+
+    window.onload = startCamera;
+</script>
+</body>
+</html>
